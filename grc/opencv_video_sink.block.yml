@@ -1,0 +1,26 @@
+id: opencv_video_sink
+label: Video Sink
+category: '[opencv]'
+
+templates:
+  imports: from gnuradio import opencv
+  make: |-
+      <%
+          win = '_vid_sink_%s'%id
+      %>\
+      ${win} = opencv.video_sink(self)
+      self.${id} = ${win}
+      ${gui_hint() % win}
+
+parameters:
+- id: gui_hint
+  label: GUI Hint
+  dtype: gui_hint
+  hide: part
+
+inputs:
+- label: frame
+  domain: message
+  optional: false
+
+file_format: 1

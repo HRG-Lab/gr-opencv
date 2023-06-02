@@ -1,0 +1,84 @@
+id: opencv_aruco_detector
+label: Aruco Detector
+category: '[opencv]'
+
+templates:
+  imports: from gnuradio import opencv
+  make: |-
+      <%
+          win = '_%s'%id
+      %>\
+      self.${id} = opencv.aruco_detector(
+        ${video_device},
+        ${dictionary},
+        ${marker_length},
+        ${calibration_file},
+      % if display_video == "True":
+        parent=self,
+        show=True
+      % endif
+      )
+      ${win} = self.${id}
+      % if display_video == "True":
+      ${gui_hint() % win}
+      % else:
+      % endif
+
+parameters:
+- id: display_video
+  label: Display Video
+  dtype: bool
+  default: 'False'
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
+- id: video_device
+  label: Video Device
+  dtype: int
+  default: 0
+- id: dictionary
+  label: Aruco Dictionary
+  dtype: enum
+  default: 0
+  options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  option_labels: [
+    DICT_4X4_50,
+    DICT_4X4_100,
+    DICT_4X4_250,
+    DICT_4X4_1000,
+    DICT_5X5_50,
+    DICT_5X5_100,
+    DICT_5X5_250,
+    DICT_5X5_1000,
+    DICT_6X6_50,
+    DICT_6X6_100,
+    DICT_6X6_250,
+    DICT_6X6_1000,
+    DICT_7X7_50,
+    DICT_7X7_100,
+    DICT_7X7_250,
+    DICT_7X7_1000,
+    DICT_ARUCO_ORIGINAL,
+    DICT_APRILTAG_16h5,
+    DICT_APRILTAG_25h9,
+    DICT_APRILTAG_36h10,
+    DICT_APRILTAG_36h11 
+  ]
+- id: marker_length
+  label: Marker Length [m]
+  dtype: float
+  default: 0
+- id: calibration_file
+  label: Calibration File
+  dtype: file_open
+  default: ""
+- id: gui_hint
+  label: GUI Hint
+  dtype: gui_hint
+  hide: ${ 'part' if display_video else 'all' }
+
+outputs:
+- id: info
+  domain: message
+  optional: true
+
+file_format: 1
