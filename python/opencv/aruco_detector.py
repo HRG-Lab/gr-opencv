@@ -47,13 +47,14 @@ class VideoThreadWorker(QObject):
         self.origin_id = 1
 
         self.cap = cv.VideoCapture(self.video_device)
+        self.cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
         if not self.cap.isOpened():
             raise RuntimeError("Couldn't open camera")
 
         self.detector = cv.aruco.ArucoDetector(self.dictionary, self.params)
 
     def run(self):
-        import time
         while True:
             ret, frame = self.cap.read()
 
@@ -62,15 +63,15 @@ class VideoThreadWorker(QObject):
                 continue
 
             self.detect_markers(frame)
-            # time.sleep(0.1)
 
     def detect_markers(self, frame):
+        frame = cv.undistort(frame, self.cam_mtx, self.dist_coeffs)
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
         corners, ids, rejected = self.detector.detectMarkers(gray)
 
         ret = {}
-        aruco.drawDetectedMarkers(frame, corners, ids)
+        aruco.drawDetectedMarkers(gray, corners, ids)
         if len(corners) > 0:
             for (id, c) in zip(ids, corners):
                 _, rvec, tvec = cv.solvePnP(
@@ -110,7 +111,7 @@ class VideoThreadWorker(QObject):
     def invert_perspective(self, rvec, tvec):
         r, _ = cv.Rodrigues(rvec)
         r = r.T
-        t_inv = np.dot(r, tvec)
+        t_inv = np.dot(r, -tvec)
         r_inv, _ = cv.Rodrigues(r)
         return r_inv, t_inv
 
